@@ -1,27 +1,41 @@
 from contracts import ProcessContract
 
 class AsciiLetterProcessor(ProcessContract):
+
     def process(self, data: dict) -> dict:
-        #extraer la aletra del input
+        message = data["message"].strip().upper()
 
-        char = data["message"].strip().upper()
-
-        #Diccionario de letras en ASCII grid 
-        letter = {
+        letters = {
             "H": [
                 "H     H",
                 "H     H",
                 "HHHHHHH",
                 "H     H",
-                "H     H", 
+                "H     H",
+            ],
+            "E": [
+                "EEEEEEE",
+                "E      ",
+                "EEEEE  ",
+                "E      ",
+                "EEEEEEE",
+            ],
+            "Y": [
+                "Y     Y",
+                " Y   Y ",
+                "  Y Y  ",
+                "   Y   ",
+                "   Y   ",
             ]
         }
 
-        #obtener el grid o el Error message
-        result = letter.get(char, ["Letra no soportada"])
+        output_lines = [""] * 5
 
-        #retornar salida 
-        return {
-            **data,
-            "message": "\n".join(result)
-        }
+        for char in message:
+            grid = letters.get(char, ["?"] * 5)
+
+            for i in range(5):
+                output_lines[i] += grid[i] + "  "
+
+        data["message"] = "\n".join(output_lines)
+        return data 

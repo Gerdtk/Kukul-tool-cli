@@ -12,5 +12,9 @@ class BasicProcessor(ProcessContract):
             self.db.save(message)
             print(f"Guardado: {message}")
 
-        print(f"Procesado: {message}")
-        return {**data, "result": message}
+
+
+        data["result"] = message
+        data["message"] = message
+        
+        return data

@@ -2,10 +2,10 @@ from contracts import OutputContract
 
 class PrintOutput(OutputContract):
     def deliver(self, data: dict) -> None:
-        result = data.get("result")
+        message = data.get("message")
 
-        if isinstance(result, list):
-            for line in result:
+        if isinstance(message, list):
+            for line in message:
                 print(line)
         else:
-            print(result)
+            print(message)

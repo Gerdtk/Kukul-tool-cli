@@ -2,28 +2,22 @@ import sys
 
 from serviceInput.cli_input import CLIInput
 from serviceOutput.print_output import PrintOutput
-from components.command_processor import CommandProcessor
-
-from components.basic_processor import BasicProcessor
-from components.ascii_letter_processor import AsciiLetterProcessor
-from components.save_processor import SaveProcesor
-
 from database import InMemoryDB
+
+from pipelines import PIPELINES
 from core import run
+from error_handlers.basic_capture_errors import BasicErrorHandler
 
-def build_pipeline(option, db=None):
-    base = [CommandProcessor(db)]
 
-    if option == "1":
-        return base + [AsciiLetterProcessor()]
-    elif option == "2":
-        return base + [SaveProcesor(db), BasicProcessor()]
-    elif option == "3":
-        return base + [BasicProcessor(), AsciiLetterProcessor()]
-    return base
+# Estructura basica ejecuta con... / Basic structure starts with...
+# main.py
+
+
 
 def main():
     print("[SYSTEM]: ready")
+
+    handler = BasicErrorHandler()
 
     use_db = "--db" in sys.argv
 
@@ -31,6 +25,7 @@ def main():
     output_service = PrintOutput()
 
     db = InMemoryDB() 
+
     if use_db:
         print("[MODE]: DB ENABLED...")
     else: None
@@ -39,10 +34,10 @@ def main():
 
     while True:
         print("\n MENU PRINCIPAL")
-        print("1️⃣ - ASCII")
-        print("2️⃣ - Básico")
-        print("3️⃣ - Pipeline")
-        print("0️⃣ - Salir")
+        print("1 - Basic")
+        print("2 - ASCII")
+        print("3 - Pipeline")
+        print("0 - Salir")
 
         option = input(" Elige Opcion: ")
 
@@ -50,27 +45,22 @@ def main():
             print("Bye")
             break
 
-        processors = build_pipeline(option, db)
+        pipeline_func = PIPELINES.get(option)
+
+        if not pipeline_func:
+            print("Opcion Invalida")
+            continue
+
+        processors = pipeline_func()
 
         while True:
             message = input("> ").strip()
 
             if message.lower() == "exit":
                 break
-
             data = {"message": message}
-
-            for processor in processors:
-                data = processor.process(data)
-                if data is None:
-                    raise ValueError(f"{processor.__class__.__name__} devolvio None")
-                if data.get("stop_pipeline"):
-                    break
-
-            if "message" in data:
-                print(data["message"])
-            else: 
-                print(data)
+            result = run(data, processors, error_handler=handler)
+            output_service.deliver(result)
 
 
 if __name__ == "__main__":
