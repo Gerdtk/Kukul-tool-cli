@@ -13,3 +13,16 @@ class ProcessContract(ABC):
 class OutputContract(ABC):
     def deliver(self, data: dict) -> None:
         pass
+
+class DBContract:
+    @abstractmethod
+    def create(self, data: dict): pass
+
+    @abstractmethod
+    def read(self, query: dict): pass
+
+    @abstractmethod
+    def update(self, query: dict): pass
+
+    @abstractmethod
+    def delete(self, query: dict): pass
